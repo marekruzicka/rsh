@@ -176,6 +176,125 @@ case $1 in
         changelog)
                 _changelog
                 exit 0;;
+        RVI)
+                # general variables
+                g="\033[1;32m"  # green
+                n="\033[0m"     # no color
+                # INPUT: fsyn98 rvi testfile
+                HOST=`basename $0`
+                L_HOSTNAME=`grep $HOST /etc/hosts | awk '{print tolower($2)}'`
+                U_HOSTNAME=`grep $HOST /etc/hosts | awk '{print $2}'`
+                #remote filename => testfile
+                R_FILE_NAME=`basename $2`
+                        _log "r_file_name: $R_FILE_NAME"
+                #remote location => /mnt/filers/c4dee1syn98
+                R_FILE_LOC="/mnt/filers/$L_HOSTNAME"
+                        _log "r_file_loc: $R_FILE_LOC"
+                #remote file => /mnt/filers/c4dee1syn98/testfile
+                R_FILE="$R_FILE_LOC/$R_FILE_NAME"
+                        _log "r_file: $R_FILE"
+
+                # create dir /tmp/rvi/<user>
+                USER=`whoami`
+                mkdir -p /tmp/rvi
+
+                # cp <file> (r_file) /tmp/rvi/<user>/<filer>.<file> (l_file)
+                # mount will be done automatically via autofs at copy
+                #local filename => fsyn98.testfile
+                L_FILE_NAME="$HOST.$R_FILE_NAME.$USER"
+                        _log "l_file_name: $L_FILE_NAME"
+                #local location => /tmp/rvi/
+                L_FILE_LOC="/tmp/rvi"
+                        _log "l_file_loc: $L_FILE_LOC"
+                #local file => /tmp/rvi/<user>/fsyn98.testfile.<user>
+                L_FILE="$L_FILE_LOC/$L_FILE_NAME"
+                        _log "l_file: $L_FILE"
+
+                cp /mnt/filers/$L_HOSTNAME/$R_FILE_NAME $L_FILE
+                if [[ $? -ne "0" ]]; then
+                        echo -e "\n\t$R_FILE ($HOST:/etc/$R_FILE_NAME) does not exist.\n"
+                        exit 1
+                fi
+                mount | grep $L_HOSTNAME
+                ls $L_FILE
+
+                # backup remote file
+                DATE=`date +%Y%m%d-%H%M`
+                R_FILE_BKP="$R_FILE.$DATE.$USER"
+                sudo cp $R_FILE $R_FILE_BKP
+                ls $R_FILE_BKP
+
+                # cp l_file l_file.edit
+                cp $L_FILE $L_FILE.edit
+                ls $L_FILE_LOC
+
+                EYN="e"
+                while [[ $EYN == "e" ]]; do
+                        # edit l_file.edit
+                        vim $L_FILE.edit
+
+                        # diff l_file l_file.edit
+                        colordiff $L_FILE $L_FILE.edit
+                        if [[ $? -eq "0" ]]; then
+                                echo -e "$g\nNo changes to $R_FILE ($HOST:/etc/$R_FILE_NAME) detected.$n"
+                        fi
+
+                        echo -e "\n  You may now re-edit $HOST:/etc/$R_FILE_NAME, save changes to filer, or discard changes and quit...\n\n\t'E' or 'e' => re-edit $HOST:/etc/$R_FILE_NAME\n\t'Y' or 'y' => save file to filer\n\t'N' or 'n' => discard all changes and quit\n"
+                        read  -p "  Do you want to save changes (re-edit/save/quit) [e]: " EYN
+                                _log "eyn after read: $EYN"
+                        case $EYN in
+                                n | N)
+                                                _log "eyn(N): $EYN"
+                                                sleep 2
+                                        echo -e "File Not Saved... cleaning up everything."
+
+                                        # Delete temp files, bkp on the filer stays untouched (to avoid granting sudo rm), exit 0
+                                        rm -f $L_FILE $L_FILE.edit
+                                        exit 0;;
+                                y | Y)
+                                                _log "eyn(Y): $EYN"
+                                                sleep 2
+                                        echo -e "Proceeding with File Save...\n"
+
+                                        # Check if r_file was not changed while editing by rvi
+                                        R_FILE_MTIME=`stat -c %Y $R_FILE`
+                                        _log "r_file.mtime: $R_FILE_MTIME"
+                                        L_FILE_MTIME=`stat -c %Y $L_FILE`
+                                        _log "l_file.mtime: $L_FILE_MTIME"
+
+                                        if [[ "$L_FILE_MTIME" -lt "$R_FILE_MTIME" ]]; then
+                                                # if yes, save to l_file.unsaved, rm temp files, exit3
+                                                echo -e "\n\tRemote file ($HOST:/etc/$R_FILE_NAME) has changed since you started to edit it..."
+                                                echo -e "\nYour changes will be saved to '$L_FILE.unsaved'. Please, check the $HOST:/etc/$R_FILE_NAME for changes and edit it again.\n"
+                                                cp $L_FILE.edit $L_FILE.unsaved
+                                                rm $L_FILE $L_FILE.edit
+                                                exit 3
+                                        else
+                                                # if no, proceed with save to filer
+                                                sudo cp $L_FILE.edit $R_FILE
+
+                                                # if save was not successful, keep the changes in l_file.unsaved, rm temp files, exit2
+                                                if [[ $? -ne "0" ]]; then
+                                                        echo -e "\n\tUnable to save $R_FILE ($HOST:/etc/$R_FILE_NAME).\nYour changes will be saved to '$L_FILE.unsaved'. Check filer/mount and try again."
+                                                        cp $L_FILE.edit $L_FILE.unsaved
+                                                        rm $L_FILE $L_FILE.edit
+                                                        exit 2
+                                                else
+                                                        echo -e "File $R_FILE ($HOST:/etc/$R_FILE_NAME) Successfully Saved."
+                                                fi
+
+                                                rm -f $L_FILE $L_FILE.edit
+                                        fi
+                                        exit 0;;
+                                *)
+                                        # Re-edit file again
+                                        EYN="e"
+                                                _log "eyn(*): $EYN"
+                                                sleep 2
+                                        echo -e "Re-opening $R_FILE ($HOST:/etc/$R_FILE_NAME) for edit...";;
+                        esac
+                done
+                exit 0;;
 esac
 
 $CONNECT $@
