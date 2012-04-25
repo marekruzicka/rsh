@@ -199,7 +199,7 @@ case $1 in
 
                 # create dir /tmp/rvi/<user>
                 USER=`whoami`
-                mkdir -p /tmp/rvi
+                mkdir -p -m 777 /tmp/rvi
 
                 # cp <file> (r_file) /tmp/rvi/<user>/<filer>.<file> (l_file)
                 # mount will be done automatically via autofs at copy
@@ -218,18 +218,14 @@ case $1 in
                         echo -e "\n\t$R_FILE ($HOST:/etc/$R_FILE_NAME) does not exist.\n"
                         exit 1
                 fi
-                mount | grep $L_HOSTNAME
-                ls $L_FILE
 
                 # backup remote file
                 DATE=`date +%Y%m%d-%H%M`
                 R_FILE_BKP="$R_FILE.$DATE.$USER"
                 sudo cp $R_FILE $R_FILE_BKP
-                ls $R_FILE_BKP
 
                 # cp l_file l_file.edit
                 cp $L_FILE $L_FILE.edit
-                ls $L_FILE_LOC
 
                 EYN="e"
                 while [[ $EYN == "e" ]]; do
@@ -247,16 +243,12 @@ case $1 in
                                 _log "eyn after read: $EYN"
                         case $EYN in
                                 n | N)
-                                                _log "eyn(N): $EYN"
-                                                sleep 2
                                         echo -e "File Not Saved... cleaning up everything."
 
                                         # Delete temp files, bkp on the filer stays untouched (to avoid granting sudo rm), exit 0
                                         rm -f $L_FILE $L_FILE.edit
                                         exit 0;;
                                 y | Y)
-                                                _log "eyn(Y): $EYN"
-                                                sleep 2
                                         echo -e "Proceeding with File Save...\n"
 
                                         # Check if r_file was not changed while editing by rvi
@@ -292,8 +284,6 @@ case $1 in
                                 *)
                                         # Re-edit file again
                                         EYN="e"
-                                                _log "eyn(*): $EYN"
-                                                sleep 2
                                         echo -e "Re-opening $R_FILE ($HOST:/etc/$R_FILE_NAME) for edit...";;
                         esac
                 done
