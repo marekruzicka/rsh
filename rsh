@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Author: Marek Ruzicka (based on the idea from Alfred Kuemmel)
-# Current Version: 2.12
+# Current Version: 2.2
 #
 # Changelog:
+# v2.2  - 'rvi' added
 # v2.12 - Minor bug fix
 # v2.11 - Added 'changelog' command to track updates to script
 # v2.1  - CIFS support for 'mount' added
@@ -22,9 +23,6 @@
 # v1.0  - Added simple help, and test for several forbidden cmds
 # v0.9  - initial release, simply passing the arguments to filer
 #
-# TODO:
-# rvi
-# 
 # Dependencies:
 # - All filers need to send syslog messages to local syslog server. These should be populated in 1 common file:
 # /var/log/netapp/messages
@@ -55,6 +53,7 @@ _default () {
         echo -e "\t\t qq\t - Sums up quotas and LUNs usage within given (or all) volume."
         echo -e "\t\t log\t - Show /etc/messages since beginning of month\n\t\t logExt\t - Show /etc/messages for last 2 months\n\t\t logFull - Show /etc/messages for last 13 months"
         echo -e "\t\t mount\t - Mount /vol/ROOT/etc or ETC\$ to /mnt/filers/<hostname>\n\t\t\t  (automatically unmounts after 3min of inactivity)"
+        echo -e "\t\t rvi\t - Edit remote file"
         echo -e "\n\tCommand completion (pressing TAB after partially written cmd) works for all above mentioned\n\tcmds (including Ontap cmds)."
         echo -e "\texample:\t$HOST <TAB><TAB> => list all available commands (Ontap and local included)"
         echo -e "\n\tCmds: 'vol' 'lun' 'cifs' 'snapmirror' 'snapvault' 'vfiler' extend command completion also to subcommands."
@@ -62,13 +61,17 @@ _default () {
         echo -e "\t\t$HOST vol <TAB><TAB> => list all available 'vol' subcommands"
         echo -e "\n\tCmds: 'rlm' 'bmc' 'sp' 'disk' 'environment' support complettion for limited set of subcommands.\n\tUsually the most used ones like 'status' or 'show'"
         echo -e "\texample:\n\t\t$HOST rl<TAB><TAB> => $HOST rlm status"
-        echo -e "\n\tEXAMPLES:\n\t\t$HOST version\n\t\t$HOST qq <vol> (if <vol> is not specified, runs on all volumes)\n\t\t$HOST mount\n"
+        echo -e "\n\tEXAMPLES:\n\t\t$HOST version\n\t\t$HOST qq <vol> (if <vol> is not specified, runs on all volumes)\n\t\t$HOST mount\n\t\t$HOST rvi <file>\n"
 }
 
 _changelog () {
         echo -e "
 \t$HOST Changelog...\n
-[12/04/20 v2.12] - minor bug fix
+[12/04/25 v2.20] - 'rvi' command added. It will mount /etc, make a backup
+of remote file, run editor, show differences after local save, and save 
+the changes to filer. Usage: $HOST rvi <remote file> Remote file has to
+be located in /etc (/vol/ROOT/etc)
+\n[12/04/20 v2.12] - minor bug fix
 \n[12/04/19 v2.11] - 'changelog' command added to show recent changes.
 Minor update to help. Minor fixes. Code cleanup.
 \n[12/04/18 v2.10] - mount extended for CIFS support. Filers without NFS
