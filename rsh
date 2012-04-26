@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Author: Marek Ruzicka (based on the idea from Alfred Kuemmel)
-# Current Version: 2.22
+# Current Version: 2.23
 #
 # Changelog:
+# v2.23 - Fixed minor bug in 'rvi', updated help (typos)
 # v2.22 - Updated help, check for ambiguos usage of --help, some info messages update
 # v2.21 - Fixed access rights 'rvi', code cleanup
 # v2.2  - 'rvi' added
@@ -46,7 +47,7 @@ fi
 }
 
 _default () {
-        echo -e "\n\tThis script will run command on filer remotly."
+        echo -e "\n\tThis script will run command on filer remotely."
         echo -e "\n\tUSAGE:\n\t\t$HOST <command>"
         echo -e "\n\tLIST OF COMMANDS:\n\t\tAll Ontap cmds under 'admin' privilige level (with some enhancements/limitations)."
         echo -e "\t\tAmbiguos commands such as 'halt', 'reboot' etc. are not allowed. Additionaly all cmds\n\t\tlisted in System Administration Guide as not allowed to run remotly, are restricted\n\t\tas well. (ping, savecore, setup, wrfile, etc ...)"
@@ -290,7 +291,7 @@ case $1 in
                                 *)
                                         # Re-edit file again
                                         EYN="e"
-                                        echo -e "Re-opening $R_FILE ($HOST:/etc/$R_FILE_NAME) for edit...";;
+                                        echo -e "Re-opening $R_FILE ($HOST:/etc/$R_FILE_NAME) for edit..."
                         esac
                 done
                 exit 0;;
