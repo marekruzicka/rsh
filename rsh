@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Author: Marek Ruzicka (based on the idea from Alfred Kuemmel)
-# Current Version: 2.23
+# Current Version: 2.24
 #
 # Changelog:
+# v2.24 - Minor update to help, 'changelog' removed (not needed)
 # v2.23 - Fixed minor bug in 'rvi', updated help (typos)
 # v2.22 - Updated help, check for ambiguos usage of --help, some info messages update
 # v2.21 - Fixed access rights 'rvi', code cleanup
@@ -49,6 +50,7 @@ fi
 _default () {
         echo -e "\n\tThis script will run command on filer remotely."
         echo -e "\n\tUSAGE:\n\t\t$HOST <command>"
+        echo -e "\t\tIf no <command> is specified, you will be connected to the filer"
         echo -e "\n\tLIST OF COMMANDS:\n\t\tAll Ontap cmds under 'admin' privilige level (with some enhancements/limitations)."
         echo -e "\t\tAmbiguos commands such as 'halt', 'reboot' etc. are not allowed. Additionaly all cmds\n\t\tlisted in System Administration Guide as not allowed to run remotly, are restricted\n\t\tas well. (ping, savecore, setup, wrfile, etc ...)"
         echo -e "\n\t\t ls\t - List directory"
@@ -65,36 +67,6 @@ _default () {
         echo -e "\n\tCmds: 'rlm' 'bmc' 'sp' 'disk' 'environment' support complettion for limited set of subcommands.\n\tUsually the most used ones like 'status' or 'show'"
         echo -e "\texample:\n\t\t$HOST rl<TAB><TAB> => $HOST rlm status"
         echo -e "\n\tEXAMPLES:\n\t\t$HOST version\n\t\t$HOST qq <vol> (if <vol> is not specified, runs on all volumes)\n\t\t$HOST mount\n\t\t$HOST rvi <file>\n"
-}
-
-_changelog () {
-        echo -e "
-\t$HOST Changelog...\n
-[12/04/25 v2.20] - 'rvi' command added. It will mount /etc, make a backup
-of remote file, run editor, show differences after local save, and save 
-the changes to filer. Usage: $HOST rvi <remote file> Remote file has to
-be located in /etc (/vol/ROOT/etc)
-\n[12/04/20 v2.12] - minor bug fix
-\n[12/04/19 v2.11] - 'changelog' command added to show recent changes.
-Minor update to help. Minor fixes. Code cleanup.
-\n[12/04/18 v2.10] - mount extended for CIFS support. Filers without NFS
-license are mounted via CIFS. Same rules apply.
-\n[12/04/16 v2.00] - 'mount' command added for easy mounting /etc to
-/mnt/filers/<hostname>. Unmounts automatically after 180s of inactivity.
-Supports NFS only. (CIFS support will be added in later versions)
-Extended log added 'logExt' and 'logFull' for showing last 2 months
-and last year of logs (keep in mind logrotate). Help completely rewritten.
-Command completion support added for all Ontap and local commands. Read help
-for more info. $HOST --help
-\n[12/04/12 v1.91] - only minor update to help. $HOST --help
-\n[12/04/11 v1.90] - 'log' command added. Reads /etc/messages from local copy
-(/var/log/netapp/messages) and displays up to 1 month of logs. Logrotate runs
-once a month, so running this command first days in month will provide very
-limited output. (will be addressed in later version)
-\n[12/04/10 v1.80] - 'qq' integrated into the script. $HOST qq <vol>
-Sums up quotas and LUNs usage within given volume. If no volume is specified,
-runs on all volumes on the filer. (original code by A.Kuemmel)
-"
 }
 
 for i in $@; do
@@ -182,9 +154,6 @@ case $1 in
                         ls $MOUNT > /dev/null
                         mount | grep $HOST
                 fi
-                exit 0;;
-        changelog)
-                _changelog
                 exit 0;;
         rvi)
                 # general variables
