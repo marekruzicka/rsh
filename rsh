@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Author: Marek Ruzicka (based on the idea from Alfred Kuemmel)
-# Current Version: 2.21
+# Current Version: 2.22
 #
 # Changelog:
+# v2.22 - Updated help, check for ambiguos usage of --help, some info messages update
 # v2.21 - Fixed access rights 'rvi', code cleanup
 # v2.2  - 'rvi' added
 # v2.12 - Minor bug fix
@@ -53,8 +54,8 @@ _default () {
         echo -e "\t\t spare\t - Return number of spare disks on the filer."
         echo -e "\t\t qq\t - Sums up quotas and LUNs usage within given (or all) volume."
         echo -e "\t\t log\t - Show /etc/messages since beginning of month\n\t\t logExt\t - Show /etc/messages for last 2 months\n\t\t logFull - Show /etc/messages for last 13 months"
-        echo -e "\t\t mount\t - Mount /vol/ROOT/etc or ETC\$ to /mnt/filers/<hostname>\n\t\t\t  (automatically unmounts after 3min of inactivity)"
-        echo -e "\t\t rvi\t - Edit remote file"
+        echo -e "\t\t mount\t - Mount /vol/ROOT/etc or ETC\$ to /mnt/filers/<hostname>\n\t\t\t   (automatically unmounts after 3min of inactivity)"
+        echo -e "\t\t rvi\t - Edit remote file. File has to be located in /etc directory\n\t\t\t   directly (can not be in subdirectory e.g. /etc/software/<file>)\n\t\t\t   No need to write full path to the file, /etc is added automatically\n."
         echo -e "\n\tCommand completion (pressing TAB after partially written cmd) works for all above mentioned\n\tcmds (including Ontap cmds)."
         echo -e "\texample:\t$HOST <TAB><TAB> => list all available commands (Ontap and local included)"
         echo -e "\n\tCmds: 'vol' 'lun' 'cifs' 'snapmirror' 'snapvault' 'vfiler' extend command completion also to subcommands."
@@ -99,6 +100,10 @@ for i in $@; do
         if [ "$i" == halt ] || [ "$i" == reboot ]; then
                 echo "Think Again!!!"
                 logger -- "--- WARNING .rsh $HOST $@ WARNING ---"
+                exit 0
+        elif
+                [[ "$i" == "--help" ]]; then
+                _default
                 exit 0
         fi
 done
@@ -214,9 +219,9 @@ case $1 in
                 L_FILE="$L_FILE_LOC/$L_FILE_NAME"
                         _log "l_file: $L_FILE"
 
-                cp /mnt/filers/$L_HOSTNAME/$R_FILE_NAME $L_FILE
+                cp /mnt/filers/$L_HOSTNAME/$R_FILE_NAME $L_FILE 2>/dev/null
                 if [[ $? -ne "0" ]]; then
-                        echo -e "\n\t$R_FILE ($HOST:/etc/$R_FILE_NAME) does not exist.\n"
+                        echo -e "\n\t$R_FILE ($HOST:/etc/$R_FILE_NAME) does not exist.\n\tIt is only possible to edit files within /etc directory!!!\n"
                         exit 1
                 fi
 
@@ -240,7 +245,7 @@ case $1 in
                         fi
 
                         echo -e "\n  You may now re-edit $HOST:/etc/$R_FILE_NAME, save changes to filer, or discard changes and quit...\n\n\t'E' or 'e' => re-edit $HOST:/etc/$R_FILE_NAME\n\t'Y' or 'y' => save file to filer\n\t'N' or 'n' => discard all changes and quit\n"
-                        read  -p "  Do you want to save changes (re-edit/save/quit) [e]: " EYN
+                        read  -p "  Do you want to save changes (e/y/n) [e]: " EYN
                                 _log "eyn after read: $EYN"
                         case $EYN in
                                 n | N)
