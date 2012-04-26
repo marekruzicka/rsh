@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Author: Marek Ruzicka (based on the idea from Alfred Kuemmel)
-# Current Version: 2.2
+# Current Version: 2.21
 #
 # Changelog:
+# v2.21 - Fixed access rights 'rvi', code cleanup
 # v2.2  - 'rvi' added
 # v2.12 - Minor bug fix
 # v2.11 - Added 'changelog' command to track updates to script
@@ -179,7 +180,7 @@ case $1 in
         changelog)
                 _changelog
                 exit 0;;
-        RVI)
+        rvi)
                 # general variables
                 g="\033[1;32m"  # green
                 n="\033[0m"     # no color
