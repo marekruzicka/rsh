@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Author: Marek Ruzicka (based on the idea from Alfred Kuemmel)
-# Current Version: 2.24
+# Current Version: 2.25
 #
 # Changelog:
+# v2.25 - Code cleanup (closing `` in ""  ("``"))
 # v2.24 - Minor update to help, 'changelog' removed (not needed)
 # v2.23 - Fixed minor bug in 'rvi', updated help (typos)
 # v2.22 - Updated help, check for ambiguos usage of --help, some info messages update
@@ -33,10 +34,9 @@
 # - autofs (automounter) pointing to /mnt/filers
 
 SSH=/usr/bin/ssh
-BASENAME=/usr/bin/basename
-HOST=`$BASENAME $0`
-L_HOSTNAME=`grep $HOST /etc/hosts | awk '{print tolower($2)}'`
-U_HOSTNAME=`grep $HOST /etc/hosts | awk '{print $2}'`
+HOST="`basename $0`"
+L_HOSTNAME="`grep $HOST /etc/hosts | awk '{print tolower($2)}'`"
+U_HOSTNAME="`grep $HOST /etc/hosts | awk '{print $2}'`"
 CONNECT="$SSH -x -a root@$HOST"
 NETAPP_LOGS=/var/log/netapp
 
@@ -143,7 +143,7 @@ case $1 in
                         done
                exit 0;;
         mount)
-                HOSTNAME=`grep $HOST /etc/auto.filer | awk '{print $1}'`
+                HOSTNAME="`grep $HOST /etc/auto.filer | awk '{print $1}'`"
                 if [ -z "$HOSTNAME" ]; then
                         echo -e "\n\tNot possible to automount $HOST. Most likely NFS/CIFS is not licensed, or /etc is not exported/shared properly.\n\tTry to mount it manually...\n\n\tIf manual mounting works, please inform M.Ruzicka.\n"
                                 _log "hostname is $HOSTNAME (NULL)."
@@ -160,11 +160,10 @@ case $1 in
                 g="\033[1;32m"  # green
                 n="\033[0m"     # no color
                 # INPUT: fsyn98 rvi testfile
-                HOST=`basename $0`
-                L_HOSTNAME=`grep $HOST /etc/hosts | awk '{print tolower($2)}'`
-                U_HOSTNAME=`grep $HOST /etc/hosts | awk '{print $2}'`
+                L_HOSTNAME="`grep $HOST /etc/hosts | awk '{print tolower($2)}'`"
+                U_HOSTNAME="`grep $HOST /etc/hosts | awk '{print $2}'`"
                 #remote filename => testfile
-                R_FILE_NAME=`basename $2`
+                R_FILE_NAME="`basename $2`"
                         _log "r_file_name: $R_FILE_NAME"
                 #remote location => /mnt/filers/c4dee1syn98
                 R_FILE_LOC="/mnt/filers/$L_HOSTNAME"
@@ -174,7 +173,7 @@ case $1 in
                         _log "r_file: $R_FILE"
 
                 # create dir /tmp/rvi/<user>
-                USER=`whoami`
+                USER="`whoami`"
                 mkdir -p -m 777 /tmp/rvi
 
                 # cp <file> (r_file) /tmp/rvi/<user>/<filer>.<file> (l_file)
@@ -196,7 +195,7 @@ case $1 in
                 fi
 
                 # backup remote file
-                DATE=`date +%Y%m%d-%H%M`
+                DATE="`date +%Y%m%d-%H%M`"
                 R_FILE_BKP="$R_FILE.$DATE.$USER"
                 sudo cp $R_FILE $R_FILE_BKP
 
@@ -228,9 +227,9 @@ case $1 in
                                         echo -e "Proceeding with File Save...\n"
 
                                         # Check if r_file was not changed while editing by rvi
-                                        R_FILE_MTIME=`stat -c %Y $R_FILE`
+                                        R_FILE_MTIME="`stat -c %Y $R_FILE`"
                                         _log "r_file.mtime: $R_FILE_MTIME"
-                                        L_FILE_MTIME=`stat -c %Y $L_FILE`
+                                        L_FILE_MTIME="`stat -c %Y $L_FILE`"
                                         _log "l_file.mtime: $L_FILE_MTIME"
 
                                         if [[ "$L_FILE_MTIME" -lt "$R_FILE_MTIME" ]]; then
