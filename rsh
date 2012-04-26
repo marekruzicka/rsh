@@ -160,8 +160,6 @@ case $1 in
                 g="\033[1;32m"  # green
                 n="\033[0m"     # no color
                 # INPUT: fsyn98 rvi testfile
-                L_HOSTNAME="`grep $HOST /etc/hosts | awk '{print tolower($2)}'`"
-                U_HOSTNAME="`grep $HOST /etc/hosts | awk '{print $2}'`"
                 #remote filename => testfile
                 R_FILE_NAME="`basename $2`"
                         _log "r_file_name: $R_FILE_NAME"
