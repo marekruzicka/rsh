@@ -61,7 +61,7 @@ _default () {
         echo -e "\t\t rvi\t - Edit remote file. File has to be located in /etc directory\n\t\t\t   directly (can not be in subdirectory e.g. /etc/software/<file>)\n\t\t\t   No need to write full path to the file, /etc is added automatically\n."
         echo -e "\n\tCommand completion (pressing TAB after partially written cmd) works for all above mentioned\n\tcmds (including Ontap cmds)."
         echo -e "\texample:\t$HOST <TAB><TAB> => list all available commands (Ontap and local included)"
-        echo -e "\n\tCmds: 'vol' 'lun' 'cifs' 'snapmirror' 'snapvault' 'vfiler' extend command completion also to subcommands."
+        echo -e "\n\tCmds: 'vol' 'lun' 'cifs' 'snapmirror' 'snapvault' 'vfiler' 'igroup' extend command completion also to subcommands."
         echo -e "\texample:\n\t\t$HOST vol st<TAB> => $HOST vol status"
         echo -e "\t\t$HOST vol <TAB><TAB> => list all available 'vol' subcommands"
         echo -e "\n\tCmds: 'rlm' 'bmc' 'sp' 'disk' 'environment' support complettion for limited set of subcommands.\n\tUsually the most used ones like 'status' or 'show'"
