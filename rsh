@@ -70,7 +70,7 @@ _default () {
 }
 
 for i in $@; do
-        if [ "$i" == halt ] || [ "$i" == reboot ]; then
+        if [[ "$i" == halt || "$i" == reboot ]]; then
                 echo "Think Again!!!"
                 logger -- "--- WARNING .rsh $HOST $@ WARNING ---"
                 exit 0
@@ -98,7 +98,7 @@ case $1 in
                 $CONNECT vol status -s | grep spare | grep -v " spare " | wc -l
                 exit 0;;
         qq)
-                if [ -z "$2" ]; then
+                if [[ -z "$2" ]]; then
                         echo -e "\nChecking filer $HOST for all its volumes usage"
                         for i in `$HOST df -g | grep -v snap | grep -v capacity | cut -d'/' -f 3`; do
                                 echo -e "\n----checking vol $i:"
@@ -117,7 +117,7 @@ case $1 in
                 grep " $L_HOSTNAME " $NETAPP_LOGS/messages
                 exit 0;;
         logExt)
-                if [ -e /var/log/netapp/messages.1 ]; then
+                if [[ -e /var/log/netapp/messages.1 ]]; then
                                 _log "messages.1 exist (exit status: $?)"
                         grep " $L_HOSTNAME " $NETAPP_LOGS/messages.1 $NETAPP_LOGS/messages
                 else
@@ -144,7 +144,7 @@ case $1 in
                exit 0;;
         mount)
                 HOSTNAME="`grep $HOST /etc/auto.filer | awk '{print $1}'`"
-                if [ -z "$HOSTNAME" ]; then
+                if [[ -z "$HOSTNAME" ]]; then
                         echo -e "\n\tNot possible to automount $HOST. Most likely NFS/CIFS is not licensed, or /etc is not exported/shared properly.\n\tTry to mount it manually...\n\n\tIf manual mounting works, please inform M.Ruzicka.\n"
                                 _log "hostname is $HOSTNAME (NULL)."
                 else
