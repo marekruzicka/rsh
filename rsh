@@ -1,9 +1,12 @@
 #!/bin/bash
 
 # Author: Marek Ruzicka (based on the idea from Alfred Kuemmel)
-# Current Version: 2.25
+# Current Version: 2.30
 #
 # Changelog:
+# v2.30 - Code cleanup (removed double variables, replacing '[' with '[[')), 
+#         updated help (command completion for 'igroup', added 'cap'),
+#         'cap' added (K. Madac), several checks for 'rvi' added.
 # v2.25 - Code cleanup (closing `` in ""  ("``"))
 # v2.24 - Minor update to help, 'changelog' removed (not needed)
 # v2.23 - Fixed minor bug in 'rvi', updated help (typos)
@@ -122,8 +125,7 @@ case $1 in
                         grep " $L_HOSTNAME " $NETAPP_LOGS/messages.1 $NETAPP_LOGS/messages
                 else
                                 _log "messages.1 does not exist (exit status: $?)"
-                        echo -e "\n\tNo older logs are available...\n\trunning '$HOST log'\n"
-                        $HOST log
+                        grep " $L_HOSTNAME " $NETAPP_LOGS/messages
                 fi
                 exit 0;;
         logFull)
@@ -141,7 +143,7 @@ case $1 in
                                                 _log "No messages file found. Exiting..."
                                 fi
                         done
-               exit 0;;
+                exit 0;;
         mount)
                 HOSTNAME="`grep $HOST /etc/auto.filer | awk '{print $1}'`"
                 if [[ -z "$HOSTNAME" ]]; then
@@ -199,6 +201,11 @@ case $1 in
 
                 # cp l_file l_file.edit
                 cp $L_FILE $L_FILE.edit
+                
+                # TODO
+                # Prompt (selection) times out after 60seconds. Save changes to l_file.unsaved, and cleans up all temp files.
+                # Protection from locking the files for rvi indeffinitely
+                # TMOUT=60
 
                 EYN="e"
                 while [[ $EYN == "e" ]]; do
@@ -260,6 +267,9 @@ case $1 in
                                         echo -e "Re-opening $R_FILE ($HOST:/etc/$R_FILE_NAME) for edit..."
                         esac
                 done
+                exit 0;;
+        cap)
+                /opt/reporting/capacity-monitor/capacity_monitor.py $HOST --head
                 exit 0;;
 esac
 
