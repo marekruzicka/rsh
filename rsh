@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Author: Marek Ruzicka (based on the idea from Alfred Kuemmel)
-# Current Version: 2.30
+# Current Version: 2.31
 #
 # Changelog:
+# v2.31 - Fixed logExt (old logfiles are compressed so zgrep must be used)
 # v2.30 - Code cleanup (removed double variables, replacing '[' with '[[' where possible), 
 #         updated help (command completion for 'igroup', added 'cap'),
 #         'cap' added (K. Madac), several checks for 'rvi' added.
@@ -122,9 +123,9 @@ case $1 in
                 grep " $L_HOSTNAME " $NETAPP_LOGS/messages
                 exit 0;;
         logExt)
-                if [[ -e /var/log/netapp/messages.1 ]]; then
+                if [[ -e /var/log/netapp/messages.1.gz ]]; then
                                 _log "messages.1 exist (exit status: $?)"
-                        grep " $L_HOSTNAME " $NETAPP_LOGS/messages.1 $NETAPP_LOGS/messages
+                        zgrep " $L_HOSTNAME " $NETAPP_LOGS/messages.1.gz $NETAPP_LOGS/messages
                 else
                                 _log "messages.1 does not exist (exit status: $?)"
                         grep " $L_HOSTNAME " $NETAPP_LOGS/messages
