@@ -125,7 +125,7 @@ case $1 in
         logExt)
                 if [[ -e /var/log/netapp/messages.1.gz ]]; then
                                 _log "messages.1 exist (exit status: $?)"
-                        zgrep " $L_HOSTNAME " $NETAPP_LOGS/messages.1.gz $NETAPP_LOGS/messages
+                        zgrep --no-filename " $L_HOSTNAME " $NETAPP_LOGS/messages.1.gz $NETAPP_LOGS/messages
                 else
                                 _log "messages.1 does not exist (exit status: $?)"
                         grep " $L_HOSTNAME " $NETAPP_LOGS/messages
