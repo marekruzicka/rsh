@@ -4,7 +4,7 @@
 # Current Version: 2.30
 #
 # Changelog:
-# v2.30 - Code cleanup (removed double variables, replacing '[' with '[[')), 
+# v2.30 - Code cleanup (removed double variables, replacing '[' with '[[' where possible), 
 #         updated help (command completion for 'igroup', added 'cap'),
 #         'cap' added (K. Madac), several checks for 'rvi' added.
 # v2.25 - Code cleanup (closing `` in ""  ("``"))
@@ -35,6 +35,7 @@
 # - All filers need to send syslog messages to local syslog server. These should be populated in 1 common file:
 # /var/log/netapp/messages
 # - autofs (automounter) pointing to /mnt/filers
+# - /opt/reporting/capacity-monitor/capacity_monitor.py by K.Madac
 
 SSH=/usr/bin/ssh
 HOST="`basename $0`"
@@ -62,7 +63,7 @@ _default () {
         echo -e "\t\t log\t - Show /etc/messages since beginning of month\n\t\t logExt\t - Show /etc/messages for last 2 months\n\t\t logFull - Show /etc/messages for last 13 months"
         echo -e "\t\t mount\t - Mount /vol/ROOT/etc or ETC\$ to /mnt/filers/<hostname>\n\t\t\t   (automatically unmounts after 3min of inactivity)"
         echo -e "\t\t rvi\t - Edit remote file. File has to be located in /etc directory\n\t\t\t   directly (can not be in subdirectory e.g. /etc/software/<file>)\n\t\t\t   No need to write full path to the file, /etc is added automatically\n."
-        echo -e "\n\tCommand completion (pressing TAB after partially written cmd) works for all above mentioned\n\tcmds (including Ontap cmds)."
+        =cho -e "\n\tCommand completion (pressing TAB after partially written cmd) works for all above mentioned\n\tcmds (including Ontap cmds)."
         echo -e "\texample:\t$HOST <TAB><TAB> => list all available commands (Ontap and local included)"
         echo -e "\n\tCmds: 'vol' 'lun' 'cifs' 'snapmirror' 'snapvault' 'vfiler' 'igroup' extend command completion also to subcommands."
         echo -e "\texample:\n\t\t$HOST vol st<TAB> => $HOST vol status"
@@ -161,6 +162,8 @@ case $1 in
                 # general variables
                 g="\033[1;32m"  # green
                 n="\033[0m"     # no color
+                r="\033[0;31m"  # red
+                rb="\033[1;31m" # red bold
                 # INPUT: fsyn98 rvi testfile
                 #remote filename => testfile
                 R_FILE_NAME="`basename $2`"
@@ -187,8 +190,24 @@ case $1 in
                 #local file => /tmp/rvi/<user>/fsyn98.testfile.<user>
                 L_FILE="$L_FILE_LOC/$L_FILE_NAME"
                         _log "l_file: $L_FILE"
+                
+                # check if file is already being edited
+                for i in $L_FILE_LOC/$HOST.$R_FILE_NAME*; do
+                        if [[ $i == *.edit ]]; then
+                                        _log "Currently edited by $i"
+                                WHO=`echo $i | cut -d. -f3`
+                                if [[ $WHO == $USER ]]; then 
+                                        echo -e "$r\nFile is currently being edited by$rb YOU$r!$n\nCheck your consoles and stop fooling around :o)\n"
+                                else
+                                        echo -e "$r\nFile is currently being edited by$rb $WHO$r!$n\nContact $WHO or try again later.\n"
+                                fi
+                       # else
+                       #                _log "rest:\t$i"
+                                exit 0
+                        fi
+                done
 
-                cp /mnt/filers/$L_HOSTNAME/$R_FILE_NAME $L_FILE 2>/dev/null
+                cp $R_FILE $L_FILE 2>/dev/null
                 if [[ $? -ne "0" ]]; then
                         echo -e "\n\t$R_FILE ($HOST:/etc/$R_FILE_NAME) does not exist.\n\tIt is only possible to edit files within /etc directory!!!\n"
                         exit 1
@@ -198,6 +217,10 @@ case $1 in
                 DATE="`date +%Y%m%d-%H%M`"
                 R_FILE_BKP="$R_FILE.$DATE.$USER"
                 sudo cp $R_FILE $R_FILE_BKP
+                if [[ $? -ne "0" ]]; then
+                        echo -e "\n\tBackup of the $R_FILE ($HOST:/etc/$R_FILE_NAME) was not successful... exiting just to be sure."
+                        exit 1
+                fi
 
                 # cp l_file l_file.edit
                 cp $L_FILE $L_FILE.edit
@@ -218,7 +241,7 @@ case $1 in
                                 echo -e "$g\nNo changes to $R_FILE ($HOST:/etc/$R_FILE_NAME) detected.$n"
                         fi
 
-                        echo -e "\n  You may now re-edit $HOST:/etc/$R_FILE_NAME, save changes to filer, or discard changes and quit...\n\n\t'E' or 'e' => re-edit $HOST:/etc/$R_FILE_NAME\n\t'Y' or 'y' => save file to filer\n\t'N' or 'n' => discard all changes and quit\n"
+                        echo -e "\n  You may now re-edit $HOST:/etc/$R_FILE_NAME, save changes to filer, or discard changes and quit...\n\n\t'e' or 'E' => re-edit $HOST:/etc/$R_FILE_NAME\n\t'y' or 'Y' => save file to filer\n\t'n' or 'N' => discard all changes and quit\n"
                         read  -p "  Do you want to save changes (e/y/n) [e]: " EYN
                                 _log "eyn after read: $EYN"
                         case $EYN in
