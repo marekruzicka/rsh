@@ -177,13 +177,13 @@ case $1 in
                 R_FILE="$R_FILE_LOC/$R_FILE_NAME"
                         _log "r_file: $R_FILE"
 
-                # create dir /tmp/rvi/<user>
+                # create dir /tmp/rvi
                 USER="`whoami`"
                 mkdir -p -m 777 /tmp/rvi
 
-                # cp <file> (r_file) /tmp/rvi/<user>/<filer>.<file> (l_file)
+                # cp <file> (r_file) /tmp/rvi/<filer>.<file> (l_file)
                 # mount will be done automatically via autofs at copy
-                #local filename => fsyn98.testfile
+                #local filename => fsyn98.testfile.<user>
                 L_FILE_NAME="$HOST.$R_FILE_NAME.$USER"
                         _log "l_file_name: $L_FILE_NAME"
                 #local location => /tmp/rvi/
@@ -258,9 +258,9 @@ case $1 in
 
                                         # Check if r_file was not changed while editing by rvi
                                         R_FILE_MTIME="`stat -c %Y $R_FILE`"
-                                        _log "r_file.mtime: $R_FILE_MTIME"
+                                                _log "r_file.mtime: $R_FILE_MTIME"
                                         L_FILE_MTIME="`stat -c %Y $L_FILE`"
-                                        _log "l_file.mtime: $L_FILE_MTIME"
+                                                _log "l_file.mtime: $L_FILE_MTIME"
 
                                         if [[ "$L_FILE_MTIME" -lt "$R_FILE_MTIME" ]]; then
                                                 # if yes, save to l_file.unsaved, rm temp files, exit3
