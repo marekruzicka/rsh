@@ -94,7 +94,7 @@ case $1 in
                 _default
                 exit 0;;
         ping | traceroute | arp | orouted | routed | savecore | setup | halt | reboot | wrfile)
-                echo -e "Command not allowed. Refer to the NetApp System Administration Guide for more info.\nConnect to the filer directly, and run the command locally."
+                echo -e "\nCommand not allowed. Refer to the NetApp System Administration Guide for more info.\nConnect to the filer directly, and run the command locally.\n\n\tUse 'rvi' instead of 'wrfile' if you want to edit files located in /etc.\n"
                 exit 0;;
         ls)
                 PRIV="priv set -q advanced;"
