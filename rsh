@@ -296,7 +296,7 @@ case $1 in
                 done
                 exit 0;;
         cap)
-                /opt/reporting/capacity-monitor/capacity_monitor.py $HOST --head
+                /opt/reporting/capacity-monitor/capacity_monitor.py $HOST -t
                 exit 0;;
         exportfs)
                 if [[ $# -gt 1 ]]; then 
