@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Author: Marek Ruzicka (based on the idea from Alfred Kuemmel)
-# Current Version: 2.31
+# Current Version: 2.32
 #
 # Changelog:
+# v2.32 - exportfs now cycles through all vfilers, instead of just showing output from vfiler0
 # v2.31 - Fixed logExt (old logfiles are compressed so zgrep must be used)
 # v2.30 - Code cleanup (removed double variables, replacing '[' with '[[' where possible), 
 #         updated help (command completion for 'igroup', added 'cap'),
@@ -37,6 +38,7 @@
 # /var/log/netapp/messages
 # - autofs (automounter) pointing to /mnt/filers
 # - /opt/reporting/capacity-monitor/capacity_monitor.py by K.Madac
+# - v1.4 SendEnv should be disabled in ssh_config to get rid of errors completely
 
 SSH=/usr/bin/ssh
 HOST="`basename $0`"
@@ -229,7 +231,7 @@ case $1 in
                 
                 # TODO
                 # Prompt (selection) times out after 60seconds. Save changes to l_file.unsaved, and cleans up all temp files.
-                # Protection from locking the files for rvi indeffinitely
+                # Protection from locking the files for rvi indefinitely
                 # TMOUT=60
 
                 EYN="e"
@@ -242,7 +244,7 @@ case $1 in
                         if [[ $? -eq "0" ]]; then
                                 echo -e "$g\nNo changes to $R_FILE ($HOST:/etc/$R_FILE_NAME) detected.$n"
                         fi
-
+                        
                         echo -e "\n  You may now re-edit $HOST:/etc/$R_FILE_NAME, save changes to filer, or discard changes and quit...\n\n\t'e' or 'E' => re-edit $HOST:/etc/$R_FILE_NAME\n\t'y' or 'Y' => save file to filer\n\t'n' or 'N' => discard all changes and quit\n"
                         read  -p "  Do you want to save changes (e/y/n) [e]: " EYN
                                 _log "eyn after read: $EYN"
@@ -295,6 +297,15 @@ case $1 in
                 exit 0;;
         cap)
                 /opt/reporting/capacity-monitor/capacity_monitor.py $HOST --head
+                exit 0;;
+        exportfs)
+                if [[ $# -gt 1 ]]; then 
+                        $CONNECT $@
+                else
+                        for i in `$CONNECT vfiler status | awk '{print $1}'`; do
+                                $CONNECT vfiler run $i exportfs
+                        done
+                fi
                 exit 0;;
 esac
 
