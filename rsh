@@ -302,9 +302,14 @@ case $1 in
                 if [[ $# -gt 1 ]]; then 
                         $CONNECT $@
                 else
-                        for i in `$CONNECT vfiler status | awk '{print $1}'`; do
-                                $CONNECT vfiler run $i exportfs
-                        done
+                        $CONNECT vfiler status | grep vfiler0 > /dev/null
+                        if [[ $? -eq 0 ]]; then 
+                                for i in `$CONNECT vfiler status | awk '{print $1}'`; do
+                                        $CONNECT vfiler run $i exportfs
+                                done
+                        else
+                                $CONNECT $@
+                        fi
                 fi
                 exit 0;;
 esac
