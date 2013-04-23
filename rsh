@@ -4,6 +4,7 @@
 # Current Version: 2.32
 #
 # Changelog:
+# v2.33 - removed root from CONNECT method which enables personalized logins
 # v2.32 - exportfs now cycles through all vfilers, instead of just showing output from vfiler0
 # v2.31 - Fixed logExt (old logfiles are compressed so zgrep must be used)
 # v2.30 - Code cleanup (removed double variables, replacing '[' with '[[' where possible), 
@@ -44,7 +45,7 @@ SSH=/usr/bin/ssh
 HOST="`basename $0`"
 L_HOSTNAME="`grep $HOST /etc/hosts | awk '{print tolower($2)}'`"
 U_HOSTNAME="`grep $HOST /etc/hosts | awk '{print $2}'`"
-CONNECT="$SSH -x -a root@$HOST"
+CONNECT="$SSH -x -a $HOST"
 NETAPP_LOGS=/var/log/netapp
 
 #_DEBUG=true
