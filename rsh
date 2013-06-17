@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Author: Marek Ruzicka (based on the idea from Alfred Kuemmel)
-# Current Version: 2.32
+# Current Version: 2.34
 #
 # Changelog:
+# v2.34 - set proper permissions on temp files, to ensure rvi is working properly
 # v2.33 - removed root from CONNECT method which enables personalized logins
 # v2.32 - exportfs now cycles through all vfilers, instead of just showing output from vfiler0
 # v2.31 - Fixed logExt (old logfiles are compressed so zgrep must be used)
@@ -217,6 +218,7 @@ case $1 in
                         echo -e "\n\t$R_FILE ($HOST:/etc/$R_FILE_NAME) does not exist.\n\tIt is only possible to edit files within /etc directory!!!\n"
                         exit 1
                 fi
+                chmod 777 $L_FILE
 
                 # backup remote file
                 DATE="`date +%Y%m%d-%H%M`"
