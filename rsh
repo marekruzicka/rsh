@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Author: Marek Ruzicka (based on the idea from Alfred Kuemmel)
-# Current Version: 2.34
+# Current Version: 2.35
 #
 # Changelog:
+# v2.35 - changed backend capacity script to na_cap.py
 # v2.34 - set proper permissions on temp files, to ensure rvi is working properly
 # v2.33 - removed root from CONNECT method which enables personalized logins
 # v2.32 - exportfs now cycles through all vfilers, instead of just showing output from vfiler0
